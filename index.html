@@ -110,15 +110,15 @@
     grid-area: header;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 14px;
+    gap: 8px;
     align-items: center;
     padding: 2px 2px 0;
     min-width: 0;
   }
 
   .logoBox {
-    width: clamp(52px, 11vw, 80px);
-    height: clamp(52px, 11vw, 80px);
+    width: clamp(36px, 8vw, 48px);
+    height: clamp(36px, 8vw, 48px);
     background: transparent;
     display: grid;
     place-items: center;
@@ -143,19 +143,19 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    font-size: clamp(1.1rem, 4vw, 2rem);
+    font-size: clamp(0.95rem, 3.8vw, 1.7rem);
     line-height: 1;
     white-space: nowrap;
   }
   body.dark .brandTitle { color: #ffffff; }
 
   .brandSub {
-    margin-top: 9px;
+    margin-top: 5px;
     color: var(--sub-color);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.38em;
-    font-size: clamp(0.72rem, 2.2vw, 1.02rem);
+    letter-spacing: 0.28em;
+    font-size: clamp(0.58rem, 1.8vw, 0.82rem);
     line-height: 1.15;
   }
 
@@ -165,9 +165,9 @@
     background: var(--toggle-bg);
     color: var(--toggle-text);
     border-radius: 999px;
-    padding: 9px 15px 9px 11px;
-    min-height: 40px;
-    font-size: 0.76rem;
+    padding: 7px 12px 7px 9px;
+    min-height: 34px;
+    font-size: 0.68rem;
     font-weight: 900;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -401,14 +401,14 @@
     justify-content: center;
     position: relative;
     z-index: 1;
-    width: 72%;
+    width: 68%;
     text-align: center;
     gap: 6px;
   }
 
   .time {
     margin: 0;
-    font-size: clamp(3rem, 33cqw, 18rem);
+    font-size: clamp(2.4rem, 26cqw, 14rem);
     line-height: 0.95;
     font-weight: 900;
     letter-spacing: -0.02em;
@@ -523,7 +523,7 @@
   @media (max-width: 420px) {
     .app { gap: 8px; padding: 10px; }
     .header { gap: 10px; grid-template-columns: auto 1fr auto; }
-    .logoBox { width: 48px; height: 48px; }
+    .logoBox { width: 36px; height: 36px; }
     .brandSub { letter-spacing: 0.22em; margin-top: 6px; }
     .themeToggle { padding: 7px 12px 7px 10px; min-height: 36px; font-size: 0.68rem; }
     .quarters { padding-top: 4px; }
@@ -553,7 +553,7 @@
     .qrow { gap: 10px; }
     .qbtn { width: clamp(52px, 7vw, 76px); height: clamp(52px, 7vw, 76px); font-size: clamp(0.92rem, 1.8vw, 1.24rem); }
     .timer { min-height: 0; padding: 12px; }
-    .time { font-size: clamp(2.4rem, 31cqw, 16rem); }
+    .time { font-size: clamp(2.0rem, 24cqw, 12rem); }
     .controls { align-self: end; }
   }
 </style>
@@ -603,18 +603,18 @@
             <!-- tick marks group -->
             <g id="ringTicks"></g>
             <!-- dark track (full circle background) -->
-            <circle id="ringTrack" cx="100" cy="100" r="82" fill="none" stroke-width="8" />
+            <circle id="ringTrack" cx="100" cy="100" r="92" fill="none" stroke-width="8" />
             <!-- BLUE arc = remaining time (shrinks as time passes) -->
-            <circle id="ringArc" cx="100" cy="100" r="82" fill="none" stroke-width="8"
+            <circle id="ringArc" cx="100" cy="100" r="92" fill="none" stroke-width="8"
               stroke-linecap="butt" />
             <!-- RED arc = elapsed time (grows as time passes) -->
-            <circle id="ringElapsed" cx="100" cy="100" r="82" fill="none" stroke-width="8"
+            <circle id="ringElapsed" cx="100" cy="100" r="92" fill="none" stroke-width="8"
               stroke-linecap="butt" />
             <!-- warning arc (last minute highlight) — kept for JS compat -->
-            <circle id="ringWarnArc" cx="100" cy="100" r="82" fill="none" stroke-width="8"
+            <circle id="ringWarnArc" cx="100" cy="100" r="92" fill="none" stroke-width="8"
               stroke-linecap="round" style="opacity:0;" />
             <!-- Glow dot at the red/blue junction -->
-            <circle id="ringGlow" cx="100" cy="18" r="7" fill="rgba(255,180,120,0.85)"
+            <circle id="ringGlow" cx="100" cy="8" r="7" fill="rgba(255,180,120,0.85)"
               style="filter:blur(3px); display:none;" />
           </svg>
           <div class="ringCenter">
@@ -680,7 +680,7 @@
     let runBaseElapsed = 0;
 
     // ---- Ring geometry ----
-    const R = 82;
+    const R = 92;
     const CX = 100, CY = 100;
     const CIRCUMFERENCE = 2 * Math.PI * R;
 
