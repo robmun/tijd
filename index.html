@@ -117,8 +117,8 @@
   }
 
   .logoBox {
-    width: clamp(36px, 8vw, 48px);
-    height: clamp(36px, 8vw, 48px);
+    width: clamp(30px, 7vw, 40px);
+    height: clamp(30px, 7vw, 40px);
     background: transparent;
     display: grid;
     place-items: center;
@@ -338,11 +338,6 @@
   }
 
   /* Hex dot overlay */
-  /* Red arc glow effect */
-  #ringElapsed {
-    filter: drop-shadow(0 0 4px rgba(220,40,40,0.7));
-  }
-
   .timer::after {
     content: "";
     position: absolute;
@@ -390,7 +385,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    transform: rotate(-90deg) scaleX(-1);
+    transform: rotate(-90deg);
     overflow: visible;
   }
 
@@ -401,14 +396,14 @@
     justify-content: center;
     position: relative;
     z-index: 1;
-    width: 68%;
+    width: 76%;
     text-align: center;
     gap: 6px;
   }
 
   .time {
     margin: 0;
-    font-size: clamp(2.4rem, 26cqw, 14rem);
+    font-size: clamp(2.4rem, 28cqw, 14rem);
     line-height: 0.95;
     font-weight: 900;
     letter-spacing: -0.02em;
@@ -523,7 +518,7 @@
   @media (max-width: 420px) {
     .app { gap: 8px; padding: 10px; }
     .header { gap: 10px; grid-template-columns: auto 1fr auto; }
-    .logoBox { width: 36px; height: 36px; }
+    .logoBox { width: 28px; height: 28px; }
     .brandSub { letter-spacing: 0.22em; margin-top: 6px; }
     .themeToggle { padding: 7px 12px 7px 10px; min-height: 36px; font-size: 0.68rem; }
     .quarters { padding-top: 4px; }
@@ -553,7 +548,7 @@
     .qrow { gap: 10px; }
     .qbtn { width: clamp(52px, 7vw, 76px); height: clamp(52px, 7vw, 76px); font-size: clamp(0.92rem, 1.8vw, 1.24rem); }
     .timer { min-height: 0; padding: 12px; }
-    .time { font-size: clamp(2.0rem, 24cqw, 12rem); }
+    .time { font-size: clamp(2.0rem, 26cqw, 12rem); }
     .controls { align-self: end; }
   }
 </style>
@@ -613,9 +608,6 @@
             <!-- warning arc (last minute highlight) — kept for JS compat -->
             <circle id="ringWarnArc" cx="100" cy="100" r="92" fill="none" stroke-width="8"
               stroke-linecap="round" style="opacity:0;" />
-            <!-- Glow dot at the red/blue junction -->
-            <circle id="ringGlow" cx="100" cy="8" r="7" fill="rgba(255,180,120,0.85)"
-              style="filter:blur(3px); display:none;" />
           </svg>
           <div class="ringCenter">
             <div id="time" class="time">00:00</div>
@@ -715,19 +707,18 @@
       const elapsedLen = elapsedFrac  * CIRCUMFERENCE;
       const remainLen  = remainFrac   * CIRCUMFERENCE;
 
-      // --- BLUE arc: remaining time ---
-      // Starts full, shrinks clockwise. We draw it from the "top" (offset 0)
-      // but offset by elapsedLen so it starts after the red part.
+      // --- BLAUW arc: verstreken tijd --- groeit met klok mee vanaf 12 uur
+      // Bij start: elapsed=0 → blauw=0, rood=vol
+      // Na verloop: blauw groeit rechts, rood krimpt
       ringArc.setAttribute('stroke', blueColor);
-      ringArc.setAttribute('stroke-dasharray', remainLen + ' ' + CIRCUMFERENCE);
-      ringArc.setAttribute('stroke-dashoffset', -elapsedLen);
+      ringArc.setAttribute('stroke-dasharray', elapsedLen + ' ' + CIRCUMFERENCE);
+      ringArc.setAttribute('stroke-dashoffset', '0');
 
-      // --- RED arc: elapsed time ---
-      // Starts at 0, grows clockwise from the top.
+      // --- ROOD arc: resterende tijd --- begint waar blauw eindigt, krimpt
       const ringElapsed = document.getElementById('ringElapsed');
       ringElapsed.setAttribute('stroke', redColor);
-      ringElapsed.setAttribute('stroke-dasharray', elapsedLen + ' ' + CIRCUMFERENCE);
-      ringElapsed.setAttribute('stroke-dashoffset', '0');
+      ringElapsed.setAttribute('stroke-dasharray', remainLen + ' ' + CIRCUMFERENCE);
+      ringElapsed.setAttribute('stroke-dashoffset', -elapsedLen);
 
       // Add a bright glow on the leading edge of the red arc
       // (achieved via filter in CSS — no extra JS needed)
@@ -735,18 +726,6 @@
       // Keep warn arc hidden (compat)
       ringWarnArc.style.opacity = '0';
 
-      // Move glow dot to the junction (end of red arc = start of blue arc)
-      const glowDot = document.getElementById('ringGlow');
-      if (elapsedFrac > 0.005 && elapsedFrac < 0.998) {
-        const angle = elapsedFrac * 2 * Math.PI; // 0 = top, clockwise
-        const gx = CX - R * Math.sin(angle);
-        const gy = CY - R * Math.cos(angle);
-        glowDot.setAttribute('cx', gx);
-        glowDot.setAttribute('cy', gy);
-        glowDot.style.display = '';
-      } else {
-        glowDot.style.display = 'none';
-      }
     }
 
     // ---- Helpers ----
