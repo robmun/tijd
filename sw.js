@@ -1,6 +1,6 @@
 // GHC Timer — Service Worker
 // Versie: verhoog dit getal bij elke update van index.html
-const CACHE_NAME = 'ghc-timer-v1';
+const CACHE_NAME = 'ghc-timer-v2';
 
 // Alle bestanden die offline beschikbaar moeten zijn
 const FILES_TO_CACHE = [
