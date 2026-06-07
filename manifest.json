@@ -1,0 +1,17 @@
+{
+  "name": "GHC Wedstrijdtimer",
+  "short_name": "GHC Timer",
+  "description": "HC Gooische wedstrijdtimer voor hockey",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#091e48",
+  "theme_color": "#091e48",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

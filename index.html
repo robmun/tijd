@@ -10,6 +10,15 @@
 <meta name="theme-color" content="#091e48"/>
 <title>GHC Wedstrijdtimer</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="manifest" href="manifest.json"/>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(err => console.warn('SW registratie mislukt:', err));
+    });
+  }
+</script>
 <style>
 :root {
   --navy:#12345f; --panel:rgba(255,255,255,0.10);
