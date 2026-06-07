@@ -64,6 +64,10 @@ body::after {
   grid-template-rows:auto auto minmax(0,1fr) auto auto;
   grid-template-areas:'header' 'quarters' 'timer' 'controls' 'footer';
 }
+/* Standalone PWA: status bar is overlaid, voeg extra ruimte toe bovenin */
+body.standalone .app {
+  padding-top:max(54px,env(safe-area-inset-top));
+}
 
 /* ── HEADER — Vision Pro glas ── */
 .header {
@@ -752,10 +756,17 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
   <button id="installClose" type="button" aria-label="Sluiten">✕</button>
 </div>
 <script>
-  // Show banner only in Safari browser (not standalone PWA)
+  // Detect standalone PWA vs Safari browser
   (function() {
     const isStandalone = window.navigator.standalone === true;
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    // Standalone: voeg class toe voor extra status-bar ruimte
+    if (isStandalone) {
+      document.body.classList.add('standalone');
+    }
+
+    // Show install banner only in Safari (niet standalone, niet eerder gesloten)
     const dismissed = sessionStorage.getItem('ghc-install-dismissed');
     if (!isStandalone && isSafari && !dismissed) {
       document.getElementById('installBanner').classList.add('visible');
