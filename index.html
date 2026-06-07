@@ -256,7 +256,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
 .footer { grid-area:footer; display:flex; align-items:center; justify-content:center; gap:8px; padding-bottom:2px; }
 .footer-logo { width:clamp(16px,3.8vw,22px); height:clamp(16px,3.8vw,22px); object-fit:contain;
   filter:brightness(0) invert(1); opacity:0.75; }
-.footer-text { color:rgba(255,255,255,0.75); font-size:clamp(0.46rem,1.3vw,0.58rem); font-weight:800; letter-spacing:0.24em; text-transform:uppercase; }
+.footer-text { color:#ffffff; font-size:clamp(0.46rem,1.3vw,0.58rem); font-weight:800; letter-spacing:0.24em; text-transform:uppercase; }
 
 @media (max-width:420px) {
   .app { gap:6px; padding:8px; }
@@ -343,57 +343,93 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       <div class="ringWrap">
         <svg id="ringSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <filter id="glowBlue" x="-25%" y="-25%" width="150%" height="150%">
-              <feGaussianBlur stdDeviation="3.5" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            <!-- Glow voor leading edge van de arc -->
+            <filter id="arcGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.8" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-            <filter id="glowRed" x="-25%" y="-25%" width="150%" height="150%">
-              <feGaussianBlur stdDeviation="3.5" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
+            <!-- Zijde-achtig buitenframe (staal-look) -->
+            <linearGradient id="steelRim" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#c8d0dc"/>
+              <stop offset="25%"  stop-color="#8a96a8"/>
+              <stop offset="50%"  stop-color="#dce4ee"/>
+              <stop offset="75%"  stop-color="#6a7585"/>
+              <stop offset="100%" stop-color="#bcc6d4"/>
+            </linearGradient>
+            <!-- Keramische bezel-gradient: dieptewerking -->
+            <linearGradient id="ceramicBezel" x1="10%" y1="0%" x2="90%" y2="100%">
+              <stop offset="0%"   stop-color="#1a2d5a"/>
+              <stop offset="30%"  stop-color="#0d1e45"/>
+              <stop offset="60%"  stop-color="#091530"/>
+              <stop offset="100%" stop-color="#1630558"/>
+            </linearGradient>
+            <!-- Glans op keramiek (lichtreflectie) -->
+            <radialGradient id="ceramicSheen" cx="35%" cy="25%" r="65%">
+              <stop offset="0%"   stop-color="rgba(120,160,255,0.22)"/>
+              <stop offset="50%"  stop-color="rgba(30,60,140,0.05)"/>
+              <stop offset="100%" stop-color="rgba(0,0,0,0.0)"/>
+            </radialGradient>
+            <!-- Inset schaduw binnenrand keramiek -->
+            <radialGradient id="innerShadow" cx="50%" cy="50%" r="50%">
+              <stop offset="75%"  stop-color="rgba(0,0,0,0.0)"/>
+              <stop offset="100%" stop-color="rgba(0,0,30,0.65)"/>
+            </radialGradient>
+            <!-- Gevormde goud/zilver tint voor streepjes -->
+            <linearGradient id="tickGold" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#e8d08a"/>
+              <stop offset="50%"  stop-color="#f5e8b0"/>
+              <stop offset="100%" stop-color="#c8a840"/>
+            </linearGradient>
           </defs>
 
-          <!-- Bezel: buitenste schaduwring (watch bezel diepte) -->
-          <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="5"/>
+          <!-- ════ STALEN BUITENRAND (Oyster case / rode GHC-accent) ════ -->
+          <circle cx="100" cy="100" r="99.5" fill="none"
+            stroke="url(#steelRim)" stroke-width="4.5"/>
+          <!-- Rode GHC-accentring (subtiel) -->
+          <circle cx="100" cy="100" r="97.5" fill="none"
+            stroke="rgba(180,30,30,0.55)" stroke-width="1.2"/>
 
-          <!-- Ring achtergrond kleureffect -->
-          <circle id="ringBg" cx="100" cy="100" r="82" fill="rgb(40,8,8)" opacity="0.55"/>
+          <!-- ════ KERAMISCHE BEZEL (donkerblauw) ════ -->
+          <!-- Basis vulling -->
+          <circle cx="100" cy="100" r="96.5" fill="none"
+            stroke="#0c1a40" stroke-width="17"/>
+          <!-- Kleurverloop voor 3D diepte -->
+          <circle cx="100" cy="100" r="96.5" fill="none"
+            stroke="url(#ceramicBezel)" stroke-width="17"/>
+          <!-- Glanslaag erover -->
+          <circle cx="100" cy="100" r="96.5" fill="none"
+            stroke="url(#ceramicSheen)" stroke-width="17"/>
+          <!-- Inset schaduw langs binnenkant bezel -->
+          <circle cx="100" cy="100" r="88.5" fill="none"
+            stroke="rgba(0,0,30,0.50)" stroke-width="3.5"/>
+          <!-- Scherpe binnenrand keramiek (metaalglans) -->
+          <circle cx="100" cy="100" r="87.8" fill="none"
+            stroke="rgba(160,180,220,0.30)" stroke-width="0.6"/>
 
-          <!-- Track: donkere achtergrond van de ring -->
-          <circle id="ringTrack" cx="100" cy="100" r="92" fill="none" stroke-width="15"/>
-
-          <!-- BLAUW: verstreken tijd (dikkere ring voor horloge-look) -->
-          <circle id="ringArc"     cx="100" cy="100" r="92" fill="none" stroke-width="15" stroke-linecap="butt"/>
-
-          <!-- ROOD: resterende tijd -->
-          <circle id="ringElapsed" cx="100" cy="100" r="92" fill="none" stroke-width="15" stroke-linecap="butt"/>
-
+          <!-- ════ VOORTGANGSRING ════ -->
+          <!-- Track (donker) -->
+          <circle id="ringTrack" cx="100" cy="100" r="92" fill="none" stroke-width="11"/>
+          <!-- BLAUW arc: verstreken tijd (met glow) -->
+          <circle id="ringArc" cx="100" cy="100" r="92" fill="none" stroke-width="11" stroke-linecap="butt"/>
+          <!-- RESTEREND arc -->
+          <circle id="ringElapsed" cx="100" cy="100" r="92" fill="none" stroke-width="11" stroke-linecap="butt"/>
           <!-- Compat -->
-          <circle id="ringWarnArc" cx="100" cy="100" r="92" fill="none" stroke-width="15"
+          <circle id="ringWarnArc" cx="100" cy="100" r="92" fill="none" stroke-width="11"
             stroke-linecap="round" style="opacity:0;"/>
 
-          <!-- Bezel: binnenste highlight (glas-effect) -->
-          <circle cx="100" cy="100" r="84.5" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
-          <!-- Bezel: buitenste highlight -->
-          <circle cx="100" cy="100" r="99.5" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
-
-          <!-- Tick marks (gebouwd door JS) -->
+          <!-- ════ TICK MARKS EN LABELS (door JS) ════ -->
           <g id="ringTicks"></g>
+          <g id="ringLabels"></g>
 
-          <!-- ══ HOCKEYSTICKS in SVG (counter-rotated zodat ze rechtop staan) ══
-               De outer SVG heeft CSS rotate(-90deg); deze g heeft rotate(+90deg) → ze heffen elkaar op
-               Sticks gecentreerd op (100,150), kruisen op (100,138) -->
+          <!-- ════ HOCKEYSTICKS ════ -->
           <g transform="rotate(90, 100, 100)">
-            <!-- Stick links: omhoog verschoven (1/3 richting tekst) -->
             <path d="M104 149 L93 156 Q88 161 85 159 Q84 156 87 155"
-              stroke="rgba(255,255,255,0.42)" stroke-width="2.0"
+              stroke="rgba(255,255,255,0.45)" stroke-width="2.2"
               stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <!-- Stick rechts -->
             <path d="M96 149 L107 156 Q112 161 115 159 Q116 156 113 155"
-              stroke="rgba(255,255,255,0.42)" stroke-width="2.0"
+              stroke="rgba(255,255,255,0.45)" stroke-width="2.2"
               stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <!-- Bal -->
-            <circle cx="100" cy="159" r="2.0" fill="rgba(255,255,255,0.38)"/>
+            <circle cx="100" cy="159" r="2.2" fill="rgba(255,255,255,0.40)"/>
           </g>
         </svg>
         <!-- Logo: absoluut bovenaan ring -->
@@ -446,6 +482,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
     const ringArc = document.getElementById('ringArc');
     const ringWarnArc = document.getElementById('ringWarnArc');
     const ringTicks = document.getElementById('ringTicks');
+    const ringLabels = document.getElementById('ringLabels');
 
     // ---- State ----
     let audioCtx = null;
@@ -465,34 +502,111 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
     const CX = 100, CY = 100;
     const CIRCUMFERENCE = 2 * Math.PI * R;
 
-    (function buildTicks() {
-      const cx=100, cy=100, r=92, N=120;
+    function buildTicks(isQ2Q4) {
+      const cx=100, cy=100;
+      const N = 60;
+      const rInner = 88.5;
+      const rOuter = 96.5;
+      const rMid   = (rInner+rOuter)/2;  // 92.5
+
+      // Welke posities krijgen een LABEL (geen streep):
+      // tick 0  = driehoek (nulpunt)
+      // tick 10 = "4"   (10/60 * 17.5 = ~2.9 → afronden = 3)  eigenlijk 10*17.5/60=2.917 → "3"
+      // tick 20 = "6"   (20*17.5/60=5.83 → "6")
+      // tick 30 = "9"   (30*17.5/60=8.75 → "9")
+      // tick 40 = "12"  (40*17.5/60=11.67 → "12")
+      // tick 50 = "15"  (50*17.5/60=14.58 → "15")
+      // Afronden op hele minuten: round(i * 17.5 / 60)
+      const labelTicks = new Set([0, 10, 20, 30, 40, 50]);
+
       ringTicks.innerHTML='';
       for(let i=0;i<N;i++){
+        if(labelTicks.has(i)) continue; // label-positie: geen streep tekenen
         const angle=(i/N)*2*Math.PI;
-        const isMajor=(i%10===0);  // 12 grote ticks (elke 30°, zoals klok)
-        const innerR = isMajor ? r-22 : r-16;  // major: 12 lang, minor: 6 lang
-        const outerR = r-10;  // eindigen net binnen inner ring edge (84.5)
-        const x1=cx+innerR*Math.cos(angle), y1=cy+innerR*Math.sin(angle);
-        const x2=cx+outerR*Math.cos(angle), y2=cy+outerR*Math.sin(angle);
+        const is5min = (i%5===0);
+        let inner, outer, sw;
+        if(is5min){
+          inner = rInner + 0.8; outer = rOuter - 0.8; sw = 2.0;
+        } else {
+          inner = rMid - 1.6; outer = rMid + 1.6; sw = 0.9;
+        }
+        const x1=cx+inner*Math.cos(angle), y1=cy+inner*Math.sin(angle);
+        const x2=cx+outer*Math.cos(angle), y2=cy+outer*Math.sin(angle);
         const line=document.createElementNS('http://www.w3.org/2000/svg','line');
         line.setAttribute('x1',x1); line.setAttribute('y1',y1);
         line.setAttribute('x2',x2); line.setAttribute('y2',y2);
-        line.setAttribute('stroke-width', isMajor?'2.5':'1.3');
-        line.setAttribute('stroke-linecap','round');
+        line.setAttribute('stroke-width', sw);
+        line.setAttribute('stroke-linecap', is5min ? 'square' : 'round');
         line.dataset.tickFrac=i/N;
         ringTicks.appendChild(line);
       }
-    })();
+
+      // LABELS: vervangen de streepjes op hun positie
+      // Cijfers zijn de afgeronde minuten van dat kwart (17.5 min totaal)
+      const ringLabels = document.getElementById('ringLabels');
+      ringLabels.innerHTML='';
+
+      // tick 0: witte driehoek (nulpunt / start)
+      // overige: afgeronde minuten
+      // Q1/Q3: 0→3→6→9→12→15  |  Q2/Q4: 17→20→23→26→29→32
+      // 17.5 min per kwart → afronden: tick*17.5/60
+      // offset = 17.5 min voor Q2/Q4
+      const baseMin = isQ2Q4 ? 17.5 : 0;
+      const labelData = [
+        {tick: 0,  text: null},
+        {tick: 10, text: String(Math.round(baseMin +  3))},
+        {tick: 20, text: String(Math.round(baseMin +  6))},
+        {tick: 30, text: String(Math.round(baseMin +  9))},
+        {tick: 40, text: String(Math.round(baseMin + 12))},
+        {tick: 50, text: String(Math.round(baseMin + 15))},
+      ];
+
+      labelData.forEach(({tick, text}) => {
+        const angle = (tick/N)*2*Math.PI;
+
+        if(text === null) {
+          // Driehoek-marker (nulpunt), net als Rolex-submariner
+          const tipR  = rInner + 1.0;
+          const baseR = rOuter - 1.2;
+          const spread = 0.065; // halve breedte in radialen
+          const tip = {x: cx + tipR*Math.cos(angle),         y: cy + tipR*Math.sin(angle)};
+          const b1  = {x: cx + baseR*Math.cos(angle-spread), y: cy + baseR*Math.sin(angle-spread)};
+          const b2  = {x: cx + baseR*Math.cos(angle+spread), y: cy + baseR*Math.sin(angle+spread)};
+          const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+          poly.setAttribute('points', `${tip.x},${tip.y} ${b1.x},${b1.y} ${b2.x},${b2.y}`);
+          poly.setAttribute('fill', 'rgba(255,255,255,0.95)');
+          poly.dataset.tickFrac='0';
+          ringLabels.appendChild(poly);
+        } else {
+          // Cijferlabel: groot, vetgedrukt, leesbaar
+          const xT = cx + rMid * Math.cos(angle);
+          const yT = cy + rMid * Math.sin(angle);
+          const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+          t.setAttribute('x', xT);
+          t.setAttribute('y', yT);
+          t.setAttribute('text-anchor','middle');
+          t.setAttribute('dominant-baseline','middle');
+          // Counter-rotate: SVG is CSS-gedraaid -90deg, dus +90 hier maakt tekst rechtop
+          t.setAttribute('transform', `rotate(90, ${xT}, ${yT})`);
+          t.setAttribute('font-size', text.length > 1 ? '6.4' : '7.2');
+          t.setAttribute('font-weight', '800');
+          t.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif');
+          t.dataset.tickFrac = tick/N;
+          t.textContent = text;
+          ringLabels.appendChild(t);
+        }
+      });
+    }
+    buildTicks(false);  // Q1 startpositie bij laden
 
     function updateRingColors() {
-      const isDark = document.body.classList.contains('dark');
-      const blueColor = '#3a8fff';
-      const redColor  = '#e03030';
-      ringTrack.setAttribute('stroke','rgba(255,255,255,0.06)');
-      ringArc._blueColor  = blueColor;
-      ringArc._redColor   = redColor;
-      ringWarnArc.setAttribute('stroke', redColor);
+      // Submariner-stijl: verstreken=helder kobaltblauw, resterend=zeer donker (bijna zwart)
+      const elapsedColor  = 'none';       // verstreken: onzichtbaar (ticks zichtbaar)
+      const remainColor   = '#0d1e45';   // resterend: keramische bezel gradient middenkleur
+      ringTrack.setAttribute('stroke','rgba(255,255,255,0.03)');
+      ringArc._blueColor  = elapsedColor;
+      ringArc._redColor   = remainColor;
+      ringWarnArc.setAttribute('stroke', '#ff3030');
     }
 
     function updateRingArc(elapsedSeconds) {
@@ -525,29 +639,31 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       // Keep warn arc hidden (compat)
       ringWarnArc.style.opacity = '0';
 
-      // ── Tick kleuren volgen ring ──
-      Array.from(ringTicks.children).forEach(line=>{
-        const frac=parseFloat(line.dataset.tickFrac||0);
+      // ── Tick kleuren: goud voor resterend, blauw-wit voor verstreken ──
+      Array.from(ringTicks.children).forEach(el=>{
+        const frac=parseFloat(el.dataset.tickFrac||0);
         if(frac<elapsedFrac){
-          line.setAttribute('stroke','rgba(80,160,255,0.70)');
-          line.setAttribute('opacity','0.75');
+          // verstreken: vervaagd (al voorbij)
+          el.setAttribute('stroke','rgba(140,170,220,0.40)');
+          if(el.tagName==='line') el.setAttribute('opacity','0.45');
         } else {
-          line.setAttribute('stroke','rgba(255,70,70,0.65)');
-          line.setAttribute('opacity','0.50');
+          // resterend: goudkleurig (prominent, als gravure in keramiek)
+          el.setAttribute('stroke','rgba(220,185,90,0.92)');
+          if(el.tagName==='line') el.setAttribute('opacity','1.0');
+        }
+      });
+      // Label kleuren ook aanpassen
+      Array.from(ringLabels.children).forEach(el=>{
+        const frac=parseFloat(el.dataset.tickFrac||0);
+        if(el.tagName==='polygon') return; // driehoek altijd wit
+        if(frac<elapsedFrac){
+          el.setAttribute('fill','rgba(100,140,200,0.40)');
+        } else {
+          el.setAttribute('fill','rgba(230,195,100,0.95)');
         }
       });
 
-      // ── Ring achtergrond kleur meeveranderen ──
-      const ringBg=document.getElementById('ringBg');
-      if(ringBg){
-        // rood → blauw naarmate tijd verstrijkt
-        const t=elapsedFrac;
-        const ri=Math.round((1-t)*40+t*8);
-        const gi=Math.round((1-t)*8+t*16);
-        const bi=Math.round((1-t)*8+t*55);
-        ringBg.style.fill='rgb('+ri+','+gi+','+bi+')';
-        ringBg.setAttribute('opacity','0.55');
-      }
+      // ringBg is weg (vervangen door SVG-lagen in nieuwe bezel)
 
       // ── Knipperen in laatste minuut ──
       const timeEl2=document.getElementById('time');
@@ -711,6 +827,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
     function changeQuarter(q) {
       stopTimer();
       currentQuarter = q;
+      buildTicks(q === 2 || q === 4);
       updateUI();
       if ('vibrate' in navigator) navigator.vibrate(10);
     }
