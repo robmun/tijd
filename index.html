@@ -124,7 +124,7 @@ body.standalone .app {
   backdrop-filter:blur(18px) saturate(160%);
   -webkit-backdrop-filter:blur(18px) saturate(160%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 28px rgba(0,0,20,0.22);
-  padding:8px 4px 10px;
+  padding:8px 4px 12px;
 }
 .half { display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 8px; position:relative; }
 .half:first-child { border-right:1px solid rgba(255,255,255,0.14); }
@@ -139,12 +139,12 @@ body.standalone .app {
 .half:first-child .halfTitle>span.ul { background:rgba(255,255,255,0.55); }
 .qrow { display:flex; justify-content:center; gap:10px; width:100%; }
 .qbtn {
-  width:clamp(54px,10.5vw,76px); height:clamp(54px,10.5vw,76px);
+  width:clamp(62px,13vw,88px); height:clamp(62px,13vw,88px);
   border-radius:50%;
   background:rgba(255,255,255,0.07);
   border:1.5px solid rgba(255,255,255,0.18);
   color:rgba(255,255,255,0.48);
-  font-weight:900; font-size:clamp(0.88rem,2.2vw,1.28rem);
+  font-weight:900; font-size:clamp(0.96rem,2.6vw,1.42rem);
   display:grid; place-items:center;
   cursor:pointer; touch-action:manipulation; user-select:none;
   transition:all .10s ease; position:relative;
@@ -179,7 +179,7 @@ body.standalone .app {
     inset 0 1px 0 rgba(255,255,255,0.16),
     inset 0 -1px 0 rgba(0,0,0,0.35);
   display:flex; align-items:center; justify-content:center;
-  padding:10px; min-height:0; overflow:hidden; position:relative;
+  padding:4px 10px; min-height:0; overflow:hidden; position:relative;
   container-type:size;
   backdrop-filter:blur(20px);
 }
@@ -210,7 +210,7 @@ body.standalone .app {
 /* Ring logo */
 .ringLogo {
   position:absolute;
-  top:18%;
+  top:15%;
   left:50%;
   transform:translateX(-50%);
   width:clamp(48px,19cqw,130px);
@@ -253,10 +253,10 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
 .secondary::before { content:"↺"; font-size:1.1em; font-weight:400; }
 
 /* ── FOOTER ── */
-.footer { grid-area:footer; display:flex; align-items:center; justify-content:center; gap:8px; padding-bottom:2px; }
-.footer-logo { width:clamp(16px,3.8vw,22px); height:clamp(16px,3.8vw,22px); object-fit:contain;
+.footer { grid-area:footer; display:flex; align-items:center; justify-content:space-between; gap:8px; padding-bottom:2px; }
+.footer-logo { width:clamp(18px,4.5vw,26px); height:clamp(18px,4.5vw,26px); object-fit:contain;
   filter:brightness(0) invert(1); opacity:0.75; }
-.footer-text { color:#ffffff; font-size:clamp(0.46rem,1.3vw,0.58rem); font-weight:800; letter-spacing:0.24em; text-transform:uppercase; }
+.footer-text { color:#ffffff; font-size:clamp(0.58rem,2.2vw,0.82rem); font-weight:800; letter-spacing:0.20em; text-transform:uppercase; }
 
 @media (max-width:420px) {
   .app { gap:6px; padding:8px; }
@@ -422,7 +422,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
           <g id="ringLabels"></g>
 
           <!-- ════ HOCKEYSTICKS ════ -->
-          <g transform="rotate(90, 100, 100)">
+          <g transform="rotate(90, 100, 100) translate(0, 4)">
             <path d="M104 149 L93 156 Q88 161 85 159 Q84 156 87 155"
               stroke="rgba(255,255,255,0.45)" stroke-width="2.2"
               stroke-linecap="round" stroke-linejoin="round" fill="none"/>
