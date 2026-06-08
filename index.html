@@ -253,10 +253,10 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
 .secondary::before { content:"↺"; font-size:1.1em; font-weight:400; }
 
 /* ── FOOTER ── */
-.footer { grid-area:footer; display:flex; align-items:center; justify-content:space-between; gap:8px; padding-bottom:clamp(2px,1vw,6px); }
-.footer-logo { width:clamp(16px,4.2vw,24px); height:clamp(16px,4.2vw,24px); object-fit:contain;
+.footer { grid-area:footer; display:flex; align-items:center; justify-content:space-between; gap:4px; padding-bottom:clamp(2px,1vw,6px); }
+.footer-logo { width:clamp(14px,3.6vw,22px); height:clamp(14px,3.6vw,22px); object-fit:contain;
   filter:brightness(0) invert(1); opacity:0.75; flex-shrink:0; }
-.footer-text { color:#ffffff; font-size:clamp(0.52rem,2.8vw,0.78rem); font-weight:800; letter-spacing:clamp(0.10em,0.8vw,0.22em); text-transform:uppercase; }
+.footer-text { color:#ffffff; font-size:clamp(0.46rem,2.3vw,0.70rem); font-weight:800; letter-spacing:clamp(0.06em,0.5vw,0.14em); text-transform:uppercase; white-space:nowrap; }
 
 @media (max-width:390px) {
   .app { gap:5px; padding-left:8px; padding-right:8px; }
@@ -343,9 +343,9 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       <div class="ringWrap">
         <svg id="ringSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <!-- Glow voor leading edge van de arc -->
+            <!-- Glow voor rode verstreken arc -->
             <filter id="arcGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="1.8" result="b"/>
+              <feGaussianBlur stdDeviation="2.5" result="b"/>
               <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
             <!-- Zijde-achtig buitenframe (staal-look) -->
@@ -409,15 +409,15 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
           <!-- ════ VOORTGANGSRING ════ -->
           <!-- Track (donker) -->
           <circle id="ringTrack" cx="100" cy="100" r="92" fill="none" stroke-width="11"/>
-          <!-- BLAUW arc: verstreken tijd (met glow) -->
-          <circle id="ringArc" cx="100" cy="100" r="92" fill="none" stroke-width="11" stroke-linecap="butt"/>
-          <!-- RESTEREND arc -->
+          <!-- ROOD arc: verstreken tijd (groeit met klok mee, met glow) — onder de ticks -->
+          <circle id="ringArc" cx="100" cy="100" r="92" fill="none" stroke-width="10" stroke-linecap="butt" filter="url(#arcGlow)"/>
+          <!-- RESTEREND arc (onzichtbaar) -->
           <circle id="ringElapsed" cx="100" cy="100" r="92" fill="none" stroke-width="11" stroke-linecap="butt"/>
           <!-- Compat -->
           <circle id="ringWarnArc" cx="100" cy="100" r="92" fill="none" stroke-width="11"
             stroke-linecap="round" style="opacity:0;"/>
 
-          <!-- ════ TICK MARKS EN LABELS (door JS) ════ -->
+          <!-- ════ TICK MARKS EN LABELS (boven de rode arc) ════ -->
           <g id="ringTicks"></g>
           <g id="ringLabels"></g>
 
@@ -600,9 +600,9 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
     buildTicks(false);  // Q1 startpositie bij laden
 
     function updateRingColors() {
-      // Submariner-stijl: verstreken=helder kobaltblauw, resterend=zeer donker (bijna zwart)
-      const elapsedColor  = 'none';       // verstreken: onzichtbaar (ticks zichtbaar)
-      const remainColor   = '#0d1e45';   // resterend: keramische bezel gradient middenkleur
+      // Submariner-stijl: verstreken=rood, resterend=onzichtbaar (ticks tonen resterende tijd)
+      const elapsedColor  = '#e03030';   // verstreken: rood (groeit met klok mee)
+      const remainColor   = 'none';      // resterend: onzichtbaar (ticks blijven zichtbaar)
       ringTrack.setAttribute('stroke','rgba(255,255,255,0.03)');
       ringArc._blueColor  = elapsedColor;
       ringArc._redColor   = remainColor;
@@ -639,28 +639,15 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       // Keep warn arc hidden (compat)
       ringWarnArc.style.opacity = '0';
 
-      // ── Tick kleuren: goud voor resterend, blauw-wit voor verstreken ──
+      // ── Tick kleuren: altijd goud zodat ze zichtbaar blijven op de rode arc ──
       Array.from(ringTicks.children).forEach(el=>{
-        const frac=parseFloat(el.dataset.tickFrac||0);
-        if(frac<elapsedFrac){
-          // verstreken: vervaagd (al voorbij)
-          el.setAttribute('stroke','rgba(140,170,220,0.40)');
-          if(el.tagName==='line') el.setAttribute('opacity','0.45');
-        } else {
-          // resterend: goudkleurig (prominent, als gravure in keramiek)
-          el.setAttribute('stroke','rgba(220,185,90,0.92)');
-          if(el.tagName==='line') el.setAttribute('opacity','1.0');
-        }
+        el.setAttribute('stroke','rgba(220,185,90,0.92)');
+        if(el.tagName==='line') el.setAttribute('opacity','1.0');
       });
-      // Label kleuren ook aanpassen
+      // Label kleuren: altijd goud
       Array.from(ringLabels.children).forEach(el=>{
-        const frac=parseFloat(el.dataset.tickFrac||0);
         if(el.tagName==='polygon') return; // driehoek altijd wit
-        if(frac<elapsedFrac){
-          el.setAttribute('fill','rgba(100,140,200,0.40)');
-        } else {
-          el.setAttribute('fill','rgba(230,195,100,0.95)');
-        }
+        el.setAttribute('fill','rgba(230,195,100,0.95)');
       });
 
       // ringBg is weg (vervangen door SVG-lagen in nieuwe bezel)
