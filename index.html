@@ -10,14 +10,71 @@
 <meta name="theme-color" content="#091e48"/>
 <title>GHC Wedstrijdtimer</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
-<link rel="manifest" href="manifest.json"/>
+<!-- Inline manifest via data URI -->
+<link rel="manifest" id="ghcManifest"/>
 <script>
+  // ── Inline Manifest ──
+  const _manifest = {
+    name: "GHC Wedstrijdtimer",
+    short_name: "GHC Timer",
+    description: "HC Gooische wedstrijdtimer voor hockeywedstrijden",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#091e48",
+    theme_color: "#091e48",
+    orientation: "any",
+    icons: [
+      { src: "apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ]
+  };
+  const _manifestBlob = new Blob([JSON.stringify(_manifest)], {type:'application/manifest+json'});
+  document.getElementById('ghcManifest').href = URL.createObjectURL(_manifestBlob);
+
+  // ── Inline Service Worker ──
   if ('serviceWorker' in navigator) {
+    const _swCode = `
+      const CACHE = 'ghc-timer-v1';
+      self.addEventListener('install', e => {
+        e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', e => {
+        e.waitUntil(caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+        ));
+        self.clients.claim();
+      });
+      self.addEventListener('fetch', e => {
+        e.respondWith(
+          caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/')))
+        );
+      });
+    `;
+    const _swBlob = new Blob([_swCode], {type:'application/javascript'});
+    const _swUrl  = URL.createObjectURL(_swBlob);
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register(_swUrl)
         .catch(err => console.warn('SW registratie mislukt:', err));
     });
   }
+
+  // ── Android / Chrome install prompt ──
+  window._deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    window._deferredInstallPrompt = e;
+    const banner = document.getElementById('installBanner');
+    const btn    = document.getElementById('installAndroid');
+    if (banner && btn) {
+      banner.classList.add('visible');
+      btn.style.display = 'flex';
+    }
+  });
+  window.addEventListener('appinstalled', () => {
+    window._deferredInstallPrompt = null;
+    const banner = document.getElementById('installBanner');
+    if (banner) banner.classList.remove('visible');
+  });
 </script>
 <style>
 :root {
@@ -310,6 +367,16 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
   font-size:1rem; cursor:pointer; padding:0;
   min-height:unset; letter-spacing:0; text-transform:none; font-weight:400;
 }
+#installAndroid {
+  display:none; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#1a8fff,#1265c0);
+  border:1px solid rgba(255,255,255,0.25);
+  color:#fff; border-radius:8px;
+  padding:6px 14px; font-size:0.72rem; font-weight:800;
+  letter-spacing:0.06em; cursor:pointer;
+  flex-shrink:0; white-space:nowrap;
+  min-height:unset; text-transform:uppercase;
+}
 </style>
 </head>
 <body>
@@ -487,10 +554,32 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
     // ---- State ----
     let audioCtx = null;
     let wakeLock = null;
-    const lastMinuteBeeped = { 1: false, 2: false, 3: false, 4: false };
 
-    let currentQuarter = 1;
-    let quarterTimes = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    // ── sessionStorage: herstel toestand na page refresh ──
+    function _loadState() {
+      try {
+        const raw = sessionStorage.getItem('ghc-timer-state');
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch(e) { return null; }
+    }
+    function _saveState() {
+      try {
+        sessionStorage.setItem('ghc-timer-state', JSON.stringify({
+          currentQuarter,
+          quarterTimes,
+          lastMinuteBeeped
+        }));
+      } catch(e) {}
+    }
+
+    const _savedState = _loadState();
+    const lastMinuteBeeped = _savedState
+      ? _savedState.lastMinuteBeeped
+      : { 1: false, 2: false, 3: false, 4: false };
+
+    let currentQuarter = _savedState ? _savedState.currentQuarter : 1;
+    let quarterTimes   = _savedState ? _savedState.quarterTimes   : { 1: 0, 2: 0, 3: 0, 4: 0 };
     let running = false;
     let lastTs = null;
     let rafId = null;
@@ -597,7 +686,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
         }
       });
     }
-    buildTicks(false);  // Q1 startpositie bij laden
+    buildTicks(currentQuarter === 2 || currentQuarter === 4);  // herstel correct kwart bij laden
 
     function updateRingColors() {
       // Submariner-stijl: verstreken=rood, resterend=onzichtbaar (ticks tonen resterende tijd)
@@ -765,9 +854,11 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       runBaseElapsed = 0;
       if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
       releaseWakeLock();
+      _saveState();
       updateUI();
     }
 
+    let _lastSaveTs = 0;
     function tick() {
       if (!running) return;
 
@@ -779,6 +870,14 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       if (!lastMinuteBeeped[currentQuarter] && prev < (QLEN - WARN_SECONDS) && nowElapsed >= (QLEN - WARN_SECONDS)) {
         lastMinuteBeeped[currentQuarter] = true;
         beepLastMinute();
+        _saveState();
+      }
+
+      // Sla toestand elke ~5 seconden op
+      const now = Date.now();
+      if (now - _lastSaveTs > 5000) {
+        _saveState();
+        _lastSaveTs = now;
       }
 
       updateUI();
@@ -808,6 +907,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       releaseWakeLock();
       setQuarterElapsed(currentQuarter, 0);
       resetBeepState(currentQuarter);
+      _saveState();
       updateUI();
     }
 
@@ -815,6 +915,7 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
       stopTimer();
       currentQuarter = q;
       buildTicks(q === 2 || q === 4);
+      _saveState();
       updateUI();
       if ('vibrate' in navigator) navigator.vibrate(10);
     }
@@ -861,30 +962,63 @@ button { border:none; border-radius:16px; padding:0 16px; font:inherit; font-wei
 
 <div id="installBanner">
   <div class="install-icon">🏑</div>
-  <div class="install-text">
+  <div class="install-text" id="installTextSafari">
     <strong>Voeg toe aan beginscherm</strong>
     <div class="install-steps">
       Tik op <span class="chip">Delen ⎋</span> dan <span class="chip">Zet op beginscherm</span> voor volledig scherm
     </div>
   </div>
+  <div class="install-text" id="installTextAndroid" style="display:none;">
+    <strong>Installeer de app</strong>
+    <div class="install-steps">Voeg GHC Timer toe als app op je toestel</div>
+  </div>
+  <button id="installAndroid" type="button" aria-label="Installeren">Installeer</button>
   <button id="installClose" type="button" aria-label="Sluiten">✕</button>
 </div>
 <script>
-  // Detect standalone PWA vs Safari browser
+  // ── PWA detectie: Safari + standalone + Android Chrome ──
   (function() {
-    const isStandalone = window.navigator.standalone === true;
+    const isStandalone = window.navigator.standalone === true
+      || window.matchMedia('(display-mode: standalone)').matches;
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-    // Standalone: voeg class toe voor extra status-bar ruimte
+    // Standalone: extra ruimte boven voor status-bar
     if (isStandalone) {
       document.body.classList.add('standalone');
     }
 
-    // Show install banner only in Safari (niet standalone, niet eerder gesloten)
     const dismissed = sessionStorage.getItem('ghc-install-dismissed');
+
+    // Safari iOS banner
     if (!isStandalone && isSafari && !dismissed) {
+      document.getElementById('installTextSafari').style.display = '';
+      document.getElementById('installTextAndroid').style.display = 'none';
       document.getElementById('installBanner').classList.add('visible');
     }
+
+    // Android Chrome: banner wordt getoond door 'beforeinstallprompt' (zie head-script)
+    // Hier zorgen we dat de juiste tekst zichtbaar is
+    window.addEventListener('beforeinstallprompt', function() {
+      if (dismissed) return;
+      document.getElementById('installTextSafari').style.display = 'none';
+      document.getElementById('installTextAndroid').style.display = '';
+    });
+
+    // Android install knop
+    document.getElementById('installAndroid').addEventListener('click', function() {
+      const prompt = window._deferredInstallPrompt;
+      if (!prompt) return;
+      prompt.prompt();
+      prompt.userChoice.then(function(result) {
+        if (result.outcome === 'accepted') {
+          document.getElementById('installBanner').classList.remove('visible');
+          sessionStorage.setItem('ghc-install-dismissed', '1');
+        }
+        window._deferredInstallPrompt = null;
+      });
+    });
+
+    // Sluiten
     document.getElementById('installClose').addEventListener('click', function() {
       document.getElementById('installBanner').classList.remove('visible');
       sessionStorage.setItem('ghc-install-dismissed', '1');
